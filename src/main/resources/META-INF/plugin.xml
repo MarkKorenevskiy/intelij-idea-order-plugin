@@ -1,0 +1,46 @@
+<idea-plugin>
+    <id>com.korenevskiy.order-annotation-plugin</id>
+    <name>Order Annotation Sorting</name>
+    <vendor>Mark Korenevskiy</vendor>
+
+    <description><![CDATA[
+    <p>Sorts classes in the <b>Project</b> view by their <code>@Order(n)</code> annotation, so the order of the
+    files in a package matches the order your code runs in. This is useful for things like filters, interceptors,
+    migrations, pipeline steps and configuration classes.</p>
+
+    <h3>How classes are ordered</h3>
+    <ul>
+      <li><b>No annotated classes in a package:</b> the package keeps the IDE's default ordering.</li>
+      <li><b>At least one annotated class:</b> annotated classes come first, by ascending value.
+          Classes with equal values are sorted by name.</li>
+      <li>Non-annotated classes and other files follow, sorted by name.</li>
+      <li>Subpackages keep their usual position.</li>
+    </ul>
+
+    <h3>Supported annotations and values</h3>
+    <ul>
+      <li>Any annotation with the simple name <code>Order</code> works, for example Spring's
+          <code>org.springframework.core.annotation.Order</code> or your own.</li>
+      <li>Values can be literals (<code>@Order(1)</code>, <code>@Order(value = -5)</code>) or constant expressions
+          (<code>@Order(Ordered.HIGHEST_PRECEDENCE + 1)</code>).</li>
+      <li><code>@Order</code> without a value is treated as <code>Integer.MAX_VALUE</code>, matching Spring.</li>
+    </ul>
+
+    <p>The view updates as you edit annotations. Ordering applies to the <i>Sort by Name</i> and
+    <i>Sort by Type</i> modes. <i>Sort by Modification Time</i> and manual ordering take precedence when selected.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- order="last": run after the Java provider has turned files into class nodes -->
+        <treeStructureProvider implementation="com.korenevskiy.orderplugin.OrderTreeStructureProvider" order="last"/>
+        <psi.treeChangeListener implementation="com.korenevskiy.orderplugin.OrderAnnotationChangeListener"/>
+    </extensions>
+
+    <projectListeners>
+        <listener class="com.korenevskiy.orderplugin.DumbModeRefresher"
+                  topic="com.intellij.openapi.project.DumbService$DumbModeListener"/>
+    </projectListeners>
+</idea-plugin>
